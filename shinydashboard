@@ -1,0 +1,47 @@
+library(shiny)
+library(shinydashboard)
+library(REmap)
+
+sidebar <- dashboardSidebar(
+  sidebarMenu(id="tabs",
+    menuItem("WiFi", tabName = "wifi", icon=icon("wifi"),
+      menuSubItem("company",
+                  tabName = "wifi_01_company",
+                  icon = icon("angle-right"),
+                  selected=TRUE))))
+
+body <- dashboardBody(
+  tabItems(
+    tabItem(tabName = "wifi_01_company",
+      tabsetPanel(type = "tabs",
+        tabPanel("trail",
+                 icon = icon("tag"),
+                 REmapOutput("map")
+                 ))))
+)
+
+header <- dashboardHeader(
+  title = "analysize"
+)
+
+ui <- dashboardPage(
+  header,
+  sidebar,
+  body
+)
+
+server <- function(input, output, session) {
+  University <- c("beijing")
+
+  Uni_Geo <- get_geo_position(University)
+  geoData <- Uni_Geo
+  output$map <- renderREmap(remapB(
+          markPointData = data.frame(Uni_Geo$city),
+          markPointTheme = markPointControl(symbol = "circle",
+                                            effect = TRUE,
+                                            symbolSize = 8,
+                                            color = "red"),
+          geoData = Uni_Geo))
+}
+
+shinyApp(ui, server)
